@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'splash_screen.dart';
 import 'home_screen.dart';
 import 'database_screen.dart';
+import 'banding_screen.dart';
 import 'profil_screen.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:io';
@@ -99,6 +100,7 @@ class MainScreenState extends State<MainScreen> {
     final List<Widget> widgetOptions = <Widget>[
       const HomeScreen(),
       DatabaseScreen(onHomeTapped: _navigateToHome),
+      BandingScreen(onHomeTapped: _navigateToHome),
       ProfilScreen(onHomeTapped: _navigateToHome),
     ];
 
@@ -120,6 +122,10 @@ class MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.bookmark),
             label: 'Database',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.compare_arrows),
+            label: 'Banding',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

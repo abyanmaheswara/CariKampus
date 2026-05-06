@@ -239,6 +239,76 @@ class _DatabaseScreenState extends State<DatabaseScreen> {
     );
   }
 
+  Widget _buildCampusAvatar(String name, String domain) {
+    const colors = [
+      Color(0xFF283593), Color(0xFF1565C0),
+      Color(0xFF0277BD), Color(0xFF00695C),
+      Color(0xFF2E7D32), Color(0xFF558B2F),
+      Color(0xFF6A1B9A), Color(0xFF4527A0),
+      Color(0xFFAD1457), Color(0xFFC62828),
+      Color(0xFFE65100), Color(0xFF4E342E),
+    ];
+    final color = colors[name.length % colors.length];
+
+    String _getInitials(String name) {
+      final words = name.split(' ');
+      if (words.length >= 2) {
+        return '${words[0][0]}${words[1][0]}';
+      }
+      return name.substring(0, name.length >= 2 ? 2 : 1);
+    }
+
+    return CircleAvatar(
+      radius: 25,
+      backgroundColor: color,
+      child: domain.isNotEmpty
+        ? ClipOval(
+            child: Image.network(
+              'https://www.google.com/s2/favicons'
+              '?domain=$domain&sz=64',
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stack) {
+                return Center(
+                  child: Text(
+                    _getInitials(name).toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                );
+              },
+              loadingBuilder: (context, child, progress) {
+                if (progress == null) return child;
+                return const Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  ),
+                );
+              },
+            ),
+          )
+        : Center(
+            child: Text(
+              _getInitials(name).toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -293,26 +363,20 @@ class _DatabaseScreenState extends State<DatabaseScreen> {
                         itemBuilder: (context, index) {
                           final item = _kampusList[index];
                           String name = item['name'] ?? '';
-                          String initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+                          String domain = item['domain'] ?? '';
                           
                           return Card(
                             elevation: 2,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: secondaryColor,
-                                child: Text(
-                                  initial,
-                                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                                ),
-                              ),
+                              leading: _buildCampusAvatar(name, domain),
                               title: Text(
                                 name,
                                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                               ),
                               subtitle: Padding(
                                 padding: const EdgeInsets.only(top: 4.0),
-                                child: Text('${item['domain'] ?? '-'}', style: const TextStyle(fontSize: 12)),
+                                child: Text(domain.isNotEmpty ? domain : '-', style: const TextStyle(fontSize: 12)),
                               ),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -337,3 +401,4 @@ class _DatabaseScreenState extends State<DatabaseScreen> {
     );
   }
 }
+
