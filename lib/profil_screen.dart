@@ -3,7 +3,8 @@ import 'main.dart';
 
 class ProfilScreen extends StatelessWidget {
   final VoidCallback onHomeTapped;
-  const ProfilScreen({super.key, required this.onHomeTapped});
+  final VoidCallback onBackTapped;
+  const ProfilScreen({super.key, required this.onHomeTapped, required this.onBackTapped});
 
   @override
   Widget build(BuildContext context) {
@@ -14,6 +15,10 @@ class ProfilScreen extends StatelessWidget {
         backgroundColor: primaryColor,
         elevation: 0,
         automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: onBackTapped,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.home, color: Colors.white),

@@ -12,9 +12,14 @@ class DetailScreen extends StatelessWidget {
     final dbHelper = DBHelper();
     final data = {
       'name': university.name,
+      'short_name': university.shortName,
+      'type': university.type,
+      'group_pt': university.group,
+      'address': university.address,
+      'province_name': university.provinceName,
+      'regency_name': university.regencyName,
       'domain': university.domain,
       'web_page': university.webPage,
-      'country': university.country,
       'catatan': '',
     };
     await dbHelper.insertKampus(data);
@@ -76,12 +81,11 @@ class DetailScreen extends StatelessWidget {
                       ];
                       final color = colors[university.name.length % colors.length];
                       
-                      String getInitials(String name) {
-                        final words = name.split(' ');
-                        if (words.length >= 2) {
-                          return '${words[0][0]}${words[1][0]}';
+                      String getInitials(University u) {
+                        if (u.shortName.isNotEmpty) {
+                          return u.shortName.substring(0, u.shortName.length >= 2 ? 2 : 1);
                         }
-                        return name.substring(0, name.length >= 2 ? 2 : 1);
+                        return u.name[0];
                       }
 
                       return CircleAvatar(
@@ -96,7 +100,7 @@ class DetailScreen extends StatelessWidget {
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) => Center(
                                   child: Text(
-                                    getInitials(university.name).toUpperCase(),
+                                    getInitials(university).toUpperCase(),
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -121,7 +125,7 @@ class DetailScreen extends StatelessWidget {
                             )
                           : Center(
                               child: Text(
-                                getInitials(university.name).toUpperCase(),
+                                getInitials(university).toUpperCase(),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -153,32 +157,13 @@ class DetailScreen extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 child: Column(
                   children: [
-                    ListTile(
-                      leading: const Icon(Icons.public, color: accentColor),
-                      title: const Text('Domain', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      subtitle: Text(
-                        university.domain.isNotEmpty ? university.domain : '-', 
-                        style: const TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w500)
-                      ),
-                    ),
+                    _buildInfoTile(Icons.public, 'Domain', university.domain),
                     const Divider(height: 1, color: surfaceColor),
-                    ListTile(
-                      leading: const Icon(Icons.language, color: accentColor),
-                      title: const Text('Website', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      subtitle: Text(
-                        university.webPage.isNotEmpty ? university.webPage : '-', 
-                        style: const TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w500)
-                      ),
-                    ),
+                    _buildInfoTile(Icons.language, 'Website', university.webPage),
                     const Divider(height: 1, color: surfaceColor),
-                    ListTile(
-                      leading: const Icon(Icons.flag, color: accentColor),
-                      title: const Text('Negara', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      subtitle: Text(
-                        university.country.isNotEmpty ? university.country : '-', 
-                        style: const TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w500)
-                      ),
-                    ),
+                    _buildInfoTile(Icons.category_outlined, 'Tipe', university.type),
+                    const Divider(height: 1, color: surfaceColor),
+                    _buildInfoTile(Icons.map_outlined, 'Provinsi', university.provinceName),
                   ],
                 ),
               ),
@@ -200,6 +185,17 @@ class DetailScreen extends StatelessWidget {
             const SizedBox(height: 32),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoTile(IconData icon, String title, String value) {
+    return ListTile(
+      leading: Icon(icon, color: accentColor),
+      title: Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+      subtitle: Text(
+        value.isNotEmpty ? value : '-', 
+        style: const TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w500)
       ),
     );
   }

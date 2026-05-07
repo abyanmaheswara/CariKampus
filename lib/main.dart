@@ -99,9 +99,9 @@ class MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final List<Widget> widgetOptions = <Widget>[
       const HomeScreen(),
-      DatabaseScreen(onHomeTapped: _navigateToHome),
-      BandingScreen(onHomeTapped: _navigateToHome),
-      ProfilScreen(onHomeTapped: _navigateToHome),
+      DatabaseScreen(onHomeTapped: goHome, onBackTapped: goBack),
+      BandingScreen(onHomeTapped: goHome, onBackTapped: goBack),
+      ProfilScreen(onHomeTapped: goHome, onBackTapped: goBack),
     ];
 
     return Scaffold(

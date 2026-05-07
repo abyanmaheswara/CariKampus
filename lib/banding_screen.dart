@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'home_screen.dart'; // To access University class
+import 'home_screen.dart'; // To access University class and staticUniversityData
 import 'main.dart';
 
 class BandingScreen extends StatefulWidget {
   final VoidCallback onHomeTapped;
-  const BandingScreen({super.key, required this.onHomeTapped});
+  final VoidCallback onBackTapped;
+  const BandingScreen({super.key, required this.onHomeTapped, required this.onBackTapped});
 
   @override
   State<BandingScreen> createState() => _BandingScreenState();
@@ -17,7 +18,6 @@ class _BandingScreenState extends State<BandingScreen> {
   University? _campus1;
   University? _campus2;
   bool _isLoading = true;
-  String _errorMessage = '';
 
   @override
   void initState() {
@@ -28,19 +28,20 @@ class _BandingScreenState extends State<BandingScreen> {
   Future<void> _loadCampuses() async {
     setState(() {
       _isLoading = true;
-      _errorMessage = '';
     });
+    
     try {
       final response = await http.get(
         Uri.parse('http://universities.hipolabs.com/search?country=Indonesia'),
-      ).timeout(const Duration(seconds: 30));
+      ).timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
-        final List jsonBody = json.decode(response.body);
-        final data = jsonBody.map((item) => University.fromJson(item)).toList();
+        final List data = json.decode(response.body);
+        final universities = data.map((item) => University.fromJson(item)).toList();
+        
         if (!mounted) return;
         setState(() {
-          _allCampuses = data;
+          _allCampuses = universities;
           _isLoading = false;
         });
       } else {
@@ -49,13 +50,12 @@ class _BandingScreenState extends State<BandingScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = e.toString();
         _isLoading = false;
       });
     }
   }
 
-  Widget _buildCampusAvatar(String name, String domain, {double radius = 25, double fontSize = 16}) {
+  Widget _buildCampusAvatar(University u, {double radius = 25, double fontSize = 16}) {
     const colors = [
       Color(0xFF283593), Color(0xFF1565C0),
       Color(0xFF0277BD), Color(0xFF00695C),
@@ -64,57 +64,40 @@ class _BandingScreenState extends State<BandingScreen> {
       Color(0xFFAD1457), Color(0xFFC62828),
       Color(0xFFE65100), Color(0xFF4E342E),
     ];
-    final color = colors[name.length % colors.length];
+    final color = colors[u.name.length % colors.length];
 
-    String _getInitials(String name) {
-      final words = name.split(' ');
-      if (words.length >= 2) {
-        return '${words[0][0]}${words[1][0]}';
+    String getInitials(University university) {
+      if (university.shortName.isNotEmpty) {
+        return university.shortName.substring(0, university.shortName.length >= 2 ? 2 : 1);
       }
-      return name.substring(0, name.length >= 2 ? 2 : 1);
+      return university.name[0];
     }
 
     return CircleAvatar(
       radius: radius,
       backgroundColor: color,
-      child: domain.isNotEmpty
+      child: u.domain.isNotEmpty
         ? ClipOval(
             child: Image.network(
-              'https://www.google.com/s2/favicons'
-              '?domain=$domain&sz=64',
+              'https://www.google.com/s2/favicons?domain=${u.domain}&sz=64',
               width: radius * 2,
               height: radius * 2,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stack) {
-                return Center(
-                  child: Text(
-                    _getInitials(name).toUpperCase(),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: fontSize,
-                    ),
+              errorBuilder: (context, error, stack) => Center(
+                child: Text(
+                  getInitials(u).toUpperCase(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: fontSize,
                   ),
-                );
-              },
-              loadingBuilder: (context, child, progress) {
-                if (progress == null) return child;
-                return Center(
-                  child: SizedBox(
-                    width: radius * 0.8,
-                    height: radius * 0.8,
-                    child: const CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  ),
-                );
-              },
+                ),
+              ),
             ),
           )
         : Center(
             child: Text(
-              _getInitials(name).toUpperCase(),
+              getInitials(u).toUpperCase(),
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -163,13 +146,16 @@ class _BandingScreenState extends State<BandingScreen> {
                   itemBuilder: (context, index) {
                     final u = _allCampuses[index];
                     return ListTile(
-                      leading: _buildCampusAvatar(u.name, u.domain, radius: 20, fontSize: 12),
+                      leading: _buildCampusAvatar(u, radius: 20, fontSize: 12),
                       title: Text(u.name, style: const TextStyle(fontSize: 14)),
-                      subtitle: Text(u.domain, style: const TextStyle(fontSize: 12)),
+                      subtitle: Text(u.domain.isNotEmpty ? u.domain : u.type, style: const TextStyle(fontSize: 12)),
                       onTap: () {
                         setState(() {
-                          if (slot == 1) _campus1 = u;
-                          else _campus2 = u;
+                          if (slot == 1) {
+                            _campus1 = u;
+                          } else {
+                            _campus2 = u;
+                          }
                         });
                         Navigator.pop(context);
                       },
@@ -192,6 +178,10 @@ class _BandingScreenState extends State<BandingScreen> {
         title: const Text('Bandingkan Kampus', style: TextStyle(color: Colors.white)),
         backgroundColor: primaryColor,
         automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: widget.onBackTapped,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.home, color: Colors.white),
@@ -244,7 +234,7 @@ class _BandingScreenState extends State<BandingScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: university != null ? primaryColor : Colors.grey[300]!, width: 2),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
         ),
         child: university == null 
           ? const Column(
@@ -260,7 +250,7 @@ class _BandingScreenState extends State<BandingScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildCampusAvatar(university.name, university.domain, radius: 25, fontSize: 14),
+                  _buildCampusAvatar(university, radius: 25, fontSize: 14),
                   const SizedBox(height: 8),
                   Text(
                     university.name,
@@ -289,9 +279,9 @@ class _BandingScreenState extends State<BandingScreen> {
             const Divider(),
             _buildCompareRow('Website', _campus1!.webPage, _campus2!.webPage),
             const Divider(),
-            _buildCompareRow('Negara', _campus1!.country, _campus2!.country),
+            _buildCompareRow('Tipe', _campus1!.type, _campus2!.type),
             const Divider(),
-            _buildCompareRow('Kategori', _getKategori(_campus1!.name), _getKategori(_campus2!.name)),
+            _buildCompareRow('Provinsi', _campus1!.provinceName, _campus2!.provinceName),
           ],
         ),
       ),
@@ -307,23 +297,13 @@ class _BandingScreenState extends State<BandingScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              Expanded(child: Text(val1, textAlign: TextAlign.center, style: const TextStyle(fontSize: 13))),
+              Expanded(child: Text(val1.isNotEmpty ? val1 : '-', textAlign: TextAlign.center, style: const TextStyle(fontSize: 13))),
               const SizedBox(width: 20),
-              Expanded(child: Text(val2, textAlign: TextAlign.center, style: const TextStyle(fontSize: 13))),
+              Expanded(child: Text(val2.isNotEmpty ? val2 : '-', textAlign: TextAlign.center, style: const TextStyle(fontSize: 13))),
             ],
           ),
         ],
       ),
     );
-  }
-
-  String _getKategori(String name) {
-    name = name.toLowerCase();
-    if (name.contains('universitas')) return 'Universitas';
-    if (name.contains('institut')) return 'Institut';
-    if (name.contains('politeknik')) return 'Politeknik';
-    if (name.contains('sekolah tinggi')) return 'Sekolah Tinggi';
-    if (name.contains('akademi')) return 'Akademi';
-    return 'Lainnya';
   }
 }

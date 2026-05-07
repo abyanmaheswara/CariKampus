@@ -4,7 +4,8 @@ import 'main.dart';
 
 class DatabaseScreen extends StatefulWidget {
   final VoidCallback onHomeTapped;
-  const DatabaseScreen({super.key, required this.onHomeTapped});
+  final VoidCallback onBackTapped;
+  const DatabaseScreen({super.key, required this.onHomeTapped, required this.onBackTapped});
 
   @override
   State<DatabaseScreen> createState() => _DatabaseScreenState();
@@ -125,7 +126,8 @@ class _DatabaseScreenState extends State<DatabaseScreen> {
     final nameController = TextEditingController(text: existingData?['name'] ?? '');
     final domainController = TextEditingController(text: existingData?['domain'] ?? '');
     final webPageController = TextEditingController(text: existingData?['web_page'] ?? '');
-    final countryController = TextEditingController(text: existingData?['country'] ?? '');
+    final typeController = TextEditingController(text: existingData?['type'] ?? '');
+    final provinceController = TextEditingController(text: existingData?['province_name'] ?? '');
     final catatanController = TextEditingController(text: existingData?['catatan'] ?? '');
 
     showDialog(
@@ -149,9 +151,10 @@ class _DatabaseScreenState extends State<DatabaseScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildTextField(nameController, 'Nama Kampus'),
-                _buildTextField(domainController, 'Domain'),
-                _buildTextField(webPageController, 'Website'),
-                _buildTextField(countryController, 'Negara'),
+                _buildTextField(domainController, 'Domain (ex: ui.ac.id)', isRequired: false),
+                _buildTextField(webPageController, 'Website URL', isRequired: false),
+                _buildTextField(typeController, 'Tipe (Univ/Inst/Pol)'),
+                _buildTextField(provinceController, 'Provinsi'),
                 _buildTextField(catatanController, 'Catatan', isRequired: false),
               ],
             ),
@@ -170,7 +173,8 @@ class _DatabaseScreenState extends State<DatabaseScreen> {
                     'name': nameController.text,
                     'domain': domainController.text,
                     'web_page': webPageController.text,
-                    'country': countryController.text,
+                    'type': typeController.text,
+                    'province_name': provinceController.text,
                     'catatan': catatanController.text,
                   };
                   if (existingData == null) {
@@ -239,7 +243,7 @@ class _DatabaseScreenState extends State<DatabaseScreen> {
     );
   }
 
-  Widget _buildCampusAvatar(String name, String domain) {
+  Widget _buildCampusAvatar(String name, String shortName, String domain) {
     const colors = [
       Color(0xFF283593), Color(0xFF1565C0),
       Color(0xFF0277BD), Color(0xFF00695C),
@@ -250,12 +254,11 @@ class _DatabaseScreenState extends State<DatabaseScreen> {
     ];
     final color = colors[name.length % colors.length];
 
-    String _getInitials(String name) {
-      final words = name.split(' ');
-      if (words.length >= 2) {
-        return '${words[0][0]}${words[1][0]}';
+    String _getInitials(String n, String sn) {
+      if (sn.isNotEmpty) {
+        return sn.substring(0, sn.length >= 2 ? 2 : 1);
       }
-      return name.substring(0, name.length >= 2 ? 2 : 1);
+      return n[0];
     }
 
     return CircleAvatar(
@@ -264,41 +267,25 @@ class _DatabaseScreenState extends State<DatabaseScreen> {
       child: domain.isNotEmpty
         ? ClipOval(
             child: Image.network(
-              'https://www.google.com/s2/favicons'
-              '?domain=$domain&sz=64',
+              'https://www.google.com/s2/favicons?domain=$domain&sz=64',
               width: 50,
               height: 50,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stack) {
-                return Center(
-                  child: Text(
-                    _getInitials(name).toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+              errorBuilder: (context, error, stack) => Center(
+                child: Text(
+                  _getInitials(name, shortName).toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
-                );
-              },
-              loadingBuilder: (context, child, progress) {
-                if (progress == null) return child;
-                return const Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  ),
-                );
-              },
+                ),
+              ),
             ),
           )
         : Center(
             child: Text(
-              _getInitials(name).toUpperCase(),
+              _getInitials(name, shortName).toUpperCase(),
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -317,6 +304,10 @@ class _DatabaseScreenState extends State<DatabaseScreen> {
         title: const Text('Catatan Kampus', style: TextStyle(color: Colors.white)),
         backgroundColor: primaryColor,
         automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: widget.onBackTapped,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.home, color: Colors.white),
@@ -363,38 +354,111 @@ class _DatabaseScreenState extends State<DatabaseScreen> {
                         itemBuilder: (context, index) {
                           final item = _kampusList[index];
                           String name = item['name'] ?? '';
+                          String shortName = item['short_name'] ?? '';
                           String domain = item['domain'] ?? '';
+                          String type = item['type'] ?? '';
                           
-                          return Card(
-                            elevation: 2,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            child: ListTile(
-                              leading: _buildCampusAvatar(name, domain),
-                              title: Text(
-                                name,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                              ),
-                              subtitle: Padding(
-                                padding: const EdgeInsets.only(top: 4.0),
-                                child: Text(domain.isNotEmpty ? domain : '-', style: const TextStyle(fontSize: 12)),
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit, color: accentColor),
-                                    onPressed: () => _showFormDialog(item),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete, color: dangerColor),
-                                    onPressed: () => _showDeleteDialog(item),
-                                  ),
-                                ],
-                              ),
+                          return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
                             ),
-                          );
-                        },
-                      ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: IntrinsicHeight(
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: _buildCampusAvatar(name, shortName, domain),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          name,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                            color: primaryColor,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: accentColor.withValues(alpha: 0.2),
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                type,
+                                                style: const TextStyle(
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: primaryColor,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Expanded(
+                                              child: Text(
+                                                domain,
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  color: Colors.grey[600],
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  width: 1,
+                                  color: Colors.grey[100],
+                                  margin: const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit_outlined, color: accentColor, size: 20),
+                                      onPressed: () => _showFormDialog(item),
+                                      visualDensity: VisualDensity.compact,
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline, color: dangerColor, size: 20),
+                                      onPressed: () => _showDeleteDialog(item),
+                                      visualDensity: VisualDensity.compact,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),

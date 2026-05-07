@@ -11,40 +11,55 @@ class DBHelper {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await initDB();
+    _database = await _getDB();
     return _database!;
   }
 
-  Future<Database> initDB() async {
-    String path = join(await getDatabasesPath(), 'kampus_tracking.db');
-    return await openDatabase(
-      path,
-      version: 3,
+  static const int _version = 5;
+  static const String _dbName = "cari_kampus.db";
+
+  Future<Database> _getDB() async {
+    return openDatabase(
+      join(await getDatabasesPath(), _dbName),
       onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE kampus_catatan(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            domain TEXT,
-            web_page TEXT,
-            country TEXT,
-            catatan TEXT
-          )
-        ''');
+        await db.execute(
+          "CREATE TABLE kampus_catatan ("
+          "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+          "name TEXT, "
+          "short_name TEXT, "
+          "type TEXT, "
+          "group_pt TEXT, "
+          "address TEXT, "
+          "province_name TEXT, "
+          "regency_name TEXT, "
+          "domain TEXT, "
+          "web_page TEXT, "
+          "catatan TEXT"
+          ")"
+        );
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        await db.execute('DROP TABLE IF EXISTS kampus_catatan');
-        await db.execute('''
-          CREATE TABLE kampus_catatan(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            domain TEXT,
-            web_page TEXT,
-            country TEXT,
-            catatan TEXT
-          )
-        ''');
-      }
+        if (oldVersion < 5) {
+          // Simplest upgrade: drop and recreate since it's a student project
+          await db.execute("DROP TABLE IF EXISTS kampus_catatan");
+          await db.execute(
+            "CREATE TABLE kampus_catatan ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            "name TEXT, "
+            "short_name TEXT, "
+            "type TEXT, "
+            "group_pt TEXT, "
+            "address TEXT, "
+            "province_name TEXT, "
+            "regency_name TEXT, "
+            "domain TEXT, "
+            "web_page TEXT, "
+            "catatan TEXT"
+            ")"
+          );
+        }
+      },
+      version: _version,
     );
   }
 
