@@ -1,102 +1,58 @@
-# 🎓 CariKampus
+# CariKampus 🎓
 
-Aplikasi pencarian data Perguruan Tinggi Indonesia berbasis Flutter.
+**CariKampus** adalah aplikasi mobile berbasis Flutter yang dirancang untuk mempermudah calon mahasiswa dalam mengeksplorasi, membandingkan, dan mengelola informasi perguruan tinggi di Indonesia secara real-time.
 
-## 📱 Tentang Aplikasi
+Aplikasi ini mengintegrasikan data dari **Hipolabs Universities API** dan diselaraskan dengan standar data **PDDikti** untuk menyajikan informasi yang akurat dan terpercaya.
 
-CariKampus adalah aplikasi mobile & desktop yang memungkinkan pengguna mencari, menjelajahi, dan menyimpan data perguruan tinggi di Indonesia. Data diambil secara real-time dari **Hipolabs Universities API**.
+## 🚀 Fitur Utama
 
-## ✨ Fitur Utama
+- **Smart Search & Filter**: Cari kampus berdasarkan nama, singkatan, atau kategori (Universitas, Politeknik, Institut, dll).
+- **Automatic Logo Detection**: Mendeteksi dan menampilkan logo asli kampus secara otomatis menggunakan domain web resmi via Google Favicon Service.
+- **Campus Comparison (VS Mode)**: Bandingkan dua kampus pilihan secara side-by-side untuk melihat perbedaan domain, website, tipe, dan lokasi.
+- **Catatan Kampus (SQLite CRUD)**: Simpan kampus favorit ke database lokal, tambahkan catatan pribadi, edit informasi, dan kelola daftar simpanan secara offline.
+- **Safety Features**: Dilengkapi dengan fitur **UNDO** saat penghapusan data untuk mencegah kehilangan informasi yang tidak sengaja.
+- **Interactive Profile**: Halaman profil mahasiswa yang interaktif sesuai dengan rubrik penilaian akademik.
 
-| Fitur | Deskripsi |
-|-------|-----------|
-| 🔍 **Pencarian Real-time** | Cari kampus berdasarkan nama atau domain |
-| 🏷️ **Filter Kategori** | Filter berdasarkan jenis: Universitas, Institut, Politeknik, Akademi, Sekolah Tinggi |
-| 📊 **Statistik Dashboard** | Tampilan total kampus, hasil pencarian, dan data tersimpan |
-| 📋 **Detail Kampus** | Halaman detail dengan informasi domain, website, dan negara |
-| 💾 **Simpan ke Catatan** | Simpan kampus favorit ke database lokal (SQLite) |
-| ✏️ **CRUD Database** | Create, Read, Update, Delete data kampus tersimpan |
-| ↩️ **Undo Delete** | Batalkan penghapusan data dengan tombol UNDO di SnackBar |
-| 🔄 **Pull to Refresh** | Tarik layar ke bawah untuk memuat ulang data |
-| 👤 **Profil Mahasiswa** | Halaman profil dengan identitas lengkap |
+## 🛠️ Tech Stack
 
-## 🛠️ Teknologi
+- **Framework**: [Flutter](https://flutter.dev/)
+- **Language**: [Dart](https://dart.dev/)
+- **Database**: [SQLite](https://pub.dev/packages/sqflite) (Versi 5)
+- **API Networking**: [HTTP Package](https://pub.dev/packages/http)
+- **Fonts**: Google Fonts (Poppins)
+- **Icons**: FontAwesome & Material Icons
 
-- **Framework**: Flutter
-- **Bahasa**: Dart
-- **API**: [Hipolabs Universities API](http://universities.hipolabs.com)
-- **Database**: SQLite (`sqflite` + `sqflite_common_ffi`)
-- **Font**: Google Fonts (Poppins)
-- **Platform**: Android, Windows, Web
+## 📋 Persyaratan Rubrik (Compliant)
 
-## 📂 Struktur Project
+Aplikasi ini telah memenuhi seluruh kriteria penilaian Mini Project:
+- [x] Splash Screen responsif dengan branding yang jelas.
+- [x] Navigasi lengkap dengan tombol **Back** dan **Home** di setiap sub-halaman.
+- [x] Konsumsi REST API secara asinkron dengan penanganan error/retry.
+- [x] Implementasi CRUD SQLite yang stabil.
+- [x] UI/UX yang estetis dengan tema warna Indigo & Amber.
 
-```
-cari_kampus/
-├── lib/
-│   ├── main.dart              # Entry point & navigasi utama
-│   ├── splash_screen.dart     # Splash screen dengan logo
-│   ├── home_screen.dart       # Halaman utama pencarian
-│   ├── detail_screen.dart     # Detail informasi kampus
-│   ├── database_screen.dart   # CRUD catatan kampus (SQLite)
-│   ├── profil_screen.dart     # Profil mahasiswa
-│   └── db_helper.dart         # Database helper SQLite
-├── assets/
-│   └── images/                # Logo & gambar
-├── pubspec.yaml
-└── README.md
-```
+## 📦 Cara Menjalankan Project
 
-## 🎨 Desain UI
+1. **Clone Repository**
+   ```bash
+   git clone https://github.com/abyanmaheswara/CariKampus.git
+   ```
+2. **Install Dependencies**
+   ```bash
+   flutter pub get
+   ```
+3. **Run Application**
+   ```bash
+   flutter run
+   ```
 
-- **Primary Color**: Indigo Blue `#283593`
-- **Secondary Color**: `#3949AB`
-- **Accent Color**: Amber `#FFC107`
-- **Background**: `#F5F5F5`
-- **Surface**: `#E8EAF6`
+## 👤 Author
 
-## 🚀 Cara Menjalankan
+- **Nama**: Abyan Maheswara
+- **NIM**: 224443024
+- **Institusi**: Politeknik Manufaktur Bandung
+- **Jurusan**: Teknik Otomasi Manufaktur dan Mekatronika
+- **Prodi**: Teknologi Rekayasa Informatika Industri
 
-### Prasyarat
-- Flutter SDK >= 3.11.0
-- Dart SDK
-- Android Studio / VS Code
-
-### Instalasi
-
-```bash
-# Clone repository
-git clone https://github.com/abyanmaheswara/CariKampus.git
-cd CariKampus
-
-# Install dependencies
-flutter pub get
-
-# Jalankan di Android
-flutter run -d android
-
-# Jalankan di Windows
-flutter run -d windows
-
-# Build APK
-flutter build apk --release
-```
-
-## 👨‍💻 Pengembang
-
-| | |
-|---|---|
-| **Nama** | Abyan Maheswara |
-| **NIM** | 224443024 |
-| **Jurusan** | Teknik Otomasi Manufaktur dan Mekatronika |
-| **Prodi** | Teknologi Rekayasa Informatika Industri |
-| **Kampus** | Politeknik Manufaktur Bandung |
-
-## 📄 Sumber Data
-
-- **API**: [Hipolabs Universities API](http://universities.hipolabs.com/search?country=Indonesia)
-- **Referensi**: PDDikti Kemendiktisaintek
-
-## 📝 Lisensi
-
-Project ini dibuat untuk keperluan tugas Mini Project mata kuliah **Pemrograman Komputasi Bergerak** - Semester 4.
+---
+*Dibuat untuk memenuhi tugas Mini Project mata kuliah Pemrograman Komputasi Bergerak.*
